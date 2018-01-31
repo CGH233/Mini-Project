@@ -38,7 +38,7 @@ class User(db.Model, UserMixin):
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
-        return check_passwork_hash(self.password_hash, password)
+        return check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
@@ -62,7 +62,7 @@ class User(db.Model, UserMixin):
 class Story(db.Model):
     __tablename__ = 'storys'
     id = db.Column(db.Integer, primary_key=True)
-    story = db.Column(db.Text, unique=True)
+    story = db.Column(db.Text(5000))
     title = db.Column(db.String(164), unique=True)
     likenum = db.Column(db.Integer)
     picture = db.Column(db.String(164))
@@ -75,7 +75,7 @@ class Story(db.Model):
 class Storyc(db.Model):
     __tablename__ = 'storycs'
     id = db.Column(db.Integer, primary_key=True)
-    storyc = db.Column(db.Text)
+    storyc = db.Column(db.Text(10000))
 #   likenum = db.Column(db.Integer)
     story_id = db.Column(db.Integer, db.ForeignKey('storys.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))

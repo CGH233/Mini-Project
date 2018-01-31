@@ -17,11 +17,9 @@ def signup():
             db.session.add(user)
             db.session.commit()
             return jsonify({
-                            "uid":user.id      
+                "uid":user.id
             })
-    else:
-        return jsonify({
-                        "message":"fail"
+        else:
+            return jsonify({
+                "message":"Has already been registered"
             }),400
-            
-            
