@@ -10,7 +10,23 @@ import json
 def readstory(storyid):
     if request.method == 'GET':
         storys = Story.query.all()
+        storycs = Storyc.query.all()
+        a = []
 
         for s in storys:
             if s.id == storyid:
-                username = s.u
+                uid = s.user_id
+                user = User.query.filter_by(id=uid),first()
+                username = user.username
+                story = s.story
+                title = s.title
+                likenum = s.likenum
+                picture = s.picture
+                for sc in storycs:
+                    if sc.story_id == storyid:
+                        a.append(sc.id)
+        
+    return jsonify({
+            "ti"
+    })
+                

@@ -15,8 +15,8 @@ def make_shell_context():
     return dict(
         app = app,
         db = db,
-        user = User
-        Story = Story
+        user = User,
+        Story = Story,
         Storyc = Storyc
     )
 

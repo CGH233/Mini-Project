@@ -25,7 +25,7 @@ def signin():
             return jsonify({
                 "message":"fail" 
             }),401
-        if user is :
+        if user is None:
             return jsonify({
                 "message":"notfound"    
             }),404

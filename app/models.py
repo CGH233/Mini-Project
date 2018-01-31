@@ -13,7 +13,7 @@ class Role(db.Model)
     users = db.relationship('User', backref='roles', lazy='dynamic')
 
     def __repr__(self):
-        return '<Role %r>' % self.name
+        return '<Role %r>' % self.name 
 '''
 
 class User(db.Model, UserMixin):
@@ -44,7 +44,7 @@ class User(db.Model, UserMixin):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'confirm': self.id})
 
-    def confirm(self, token)
+    def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -59,26 +59,26 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return '<User %r>' % self.username
 
-class Story(db.Model)
+class Story(db.Model):
     __tablename__ = 'storys'
     id = db.Column(db.Integer, primary_key=True)
     story = db.Column(db.Text, unique=True)
     title = db.Column(db.String(164), unique=True)
     likenum = db.Column(db.Integer)
     picture = db.Column(db.String(164))
-    user_id = db.Column(db.Integer, db.Foreignkey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     storycs = db.relationship('Storyc', backref='story', lazy='dynamic') 
 
     def __repr__(self):
         return '<Story %r>' % self.name
 
-class Storyc(db.Model)
+class Storyc(db.Model):
     __tablename__ = 'storycs'
     id = db.Column(db.Integer, primary_key=True)
     storyc = db.Column(db.Text)
-    likenum = db.Column(db.Integer)
-    story_id = db.Column(db.Integer, db.Foreignkey('storys.id'))
-    user_id = db.Column(db.Integer, db.Foreignkey('users.id'))
+#   likenum = db.Column(db.Integer)
+    story_id = db.Column(db.Integer, db.ForeignKey('storys.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Storyc %r>' % self.name
@@ -86,4 +86,3 @@ class Storyc(db.Model)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
