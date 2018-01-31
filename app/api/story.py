@@ -11,7 +11,6 @@ def readstory(storyid):
     if request.method == 'GET':
         storys = Story.query.all()
         storycs = Storyc.query.all()
-        a = []
 
         for s in storys:
             if s.id == storyid:
@@ -24,9 +23,16 @@ def readstory(storyid):
                 picture = s.picture
                 for sc in storycs:
                     if sc.story_id == storyid:
-                        a.append(sc.id)
+                        
         
     return jsonify({
-            "ti"
+        "title":title,
+        "story":story,
+        "likenum":liknum,
+        "username":username,
+        "picture":picture,
+        "storyc":storyc
     })
+
+@api.route('/story/random/', methods = [''])
                 

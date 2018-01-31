@@ -18,10 +18,10 @@ def signin():
             uid = None
         if user is not None and user.verify_password(password):
             uid = user.id
-#            token = user.generate_confirmation_token
+            token = user.generate_confirmation_token()
             return jsonify({
                 "uid":user.id,
- #               "token":user.generate_confirmation_token
+                "token":token
             })
         else:
             return jsonify({
@@ -40,4 +40,4 @@ def signin():
             else:
                 return jsonify({
                     "message":"fail"    
-                    }),401
+                }),401
