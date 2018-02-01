@@ -16,10 +16,8 @@ def signup():
                         password = password)
             db.session.add(user)
             db.session.commit()
-            token = user.generate_confirmation_token()
             return jsonify({
                 "uid":user.id,
-                "token":token
             })
         else:
             return jsonify({

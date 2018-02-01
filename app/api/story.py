@@ -134,7 +134,7 @@ def rank():
 def write():
     if request.method == 'POST':
         token = request.headers.get('token')
-        if token == User.confirmed():
+        if User.confirmed(toekn):
             story1 = request.get_json().get('story')
             uid = request.get_json().get('uid')
             keyword1 = request.get_json().get('keyword')
