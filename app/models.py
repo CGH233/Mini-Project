@@ -63,14 +63,25 @@ class Story(db.Model):
     __tablename__ = 'storys'
     id = db.Column(db.Integer, primary_key=True)
     story = db.Column(db.Text(5000))
-    title = db.Column(db.String(164), unique=True)
     likenum = db.Column(db.Integer)
-    picture = db.Column(db.String(164))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     storycs = db.relationship('Storyc', backref='story', lazy='dynamic') 
+    keywords = db.relationship('Keyword', backref='story', lazy='dynamic')
 
     def __repr__(self):
         return '<Story %r>' % self.name
+class Keyword(db.Model):
+    __tablename__ = 'keywords'
+    id = db.Column(db.Integer, primary_key=True)
+    keyword1 = db.Column(db.String(10))
+    keyword2 = db.Column(db.String(10))
+    keyword3 = db.Column(db.String(10))
+    keyword4 = db.Column(db.String(10))
+    keyword5 = db.Column(db.String(10))
+    keyword6 = db.Column(db.String(10))
+    keyword7 = db.Column(db.String(10))
+    keyword8 = db.Column(db.String(10))
+    story_id = db.Column(db.Integer, db.ForeignKey('storys.id'))
 
 class Storyc(db.Model):
     __tablename__ = 'storycs'
