@@ -13,7 +13,11 @@ def signup():
         password = request.get_json().get('password')
         if not User.query.filter_by(username = username).first():
             user = User(username = username,
-                        password = password)
+                        password = password,
+                        userwords = 0,
+                        userlikenum = 0,
+                        usa = 0,
+                        usb = 0)
             db.session.add(user)
             db.session.commit()
             return jsonify({

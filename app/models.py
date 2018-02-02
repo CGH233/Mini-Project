@@ -5,16 +5,6 @@ from . import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
-'''
-class Role(db.Model)
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    users = db.relationship('User', backref='roles', lazy='dynamic')
-
-    def __repr__(self):
-        return '<Role %r>' % self.name 
-'''
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -51,6 +41,8 @@ class User(db.Model, UserMixin):
         except:
             return False
         if data.get('confirm') != self.id:
+            print(data.get('confirm'))
+            print(self.id)
             return False
         self.confirmed = True
         db.session.add(self)
@@ -64,35 +56,26 @@ class Story(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     story = db.Column(db.Text(5000))
     likenum = db.Column(db.Integer)
+    keywords = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    storycs = db.relationship('Storyc', backref='story', lazy='dynamic') 
-    keywords = db.relationship('Keyword', backref='story', lazy='dynamic')
+    storycs = db.relationship('Storyc', backref='story', lazy='dynamic')
 
     def __repr__(self):
-        return '<Story %r>' % self.name
-class Keyword(db.Model):
-    __tablename__ = 'keywords'
-    id = db.Column(db.Integer, primary_key=True)
-    keyword1 = db.Column(db.String(10))
-    keyword2 = db.Column(db.String(10))
-    keyword3 = db.Column(db.String(10))
-    keyword4 = db.Column(db.String(10))
-    keyword5 = db.Column(db.String(10))
-    keyword6 = db.Column(db.String(10))
-    keyword7 = db.Column(db.String(10))
-    keyword8 = db.Column(db.String(10))
-    story_id = db.Column(db.Integer, db.ForeignKey('storys.id'))
+        return '<Story %r>' % self.story
+
+    def __repr__(self):
+        return '<Keyword %r>' % self.keyword1
 
 class Storyc(db.Model):
     __tablename__ = 'storycs'
     id = db.Column(db.Integer, primary_key=True)
-    storyc = db.Column(db.Text(10000))
+    storyc = db.Column(db.Text(5000))
 #   likenum = db.Column(db.Integer)
     story_id = db.Column(db.Integer, db.ForeignKey('storys.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Storyc %r>' % self.name
+        return '<Storyc %r>' % self.storyc
 
 @login_manager.user_loader
 def load_user(user_id):
