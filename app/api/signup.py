@@ -18,6 +18,7 @@ def signup():
             db.session.commit()
             return jsonify({
                 "uid":user.id,
+                "message":""
             })
         else:
             return jsonify({
