@@ -2,7 +2,7 @@
 from flask import jsonify, request, Response
 from . import api
 from app import db
-from app.models import User, Story, Storyc
+from app.models import User, Story, Storyc, Keyword
 from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy.sql import func
 import random
@@ -16,28 +16,27 @@ def readstory(storyid):
         storyc = []
         usernamec = []
 
-        for s in storys:
-            if s.id == storyid:
+        for x in storys:
+            s = Story.query.filter_by(story=x.story).first()
+            if int(s.id) == storyid:
                 uid = s.user_id
-                user = User.query.filter_by(id=uid),first()
+                user = User.query.filter_by(id=uid).first()
                 username = user.username
                 story = s.story
-                title = s.title
                 likenum = s.likenum
                 for sc in storycs:
                     if sc.story_id == storyid:
                         storyc.append(sc.storyc)      
                         usernamec.append(User.query.filter_by(id=sc.user_id).first())
-
-        return jsonify({
-            "story":story,
-            "likenum":liknum,
-            "username":username,
-            "storyc":[{
-                "storyc":storyc,
-                "usernamec":usernamec
-            }]
-        }),200
+                return jsonify({
+                    "story":story,
+                    "likenum":likenum,
+                    "username":username,
+                    "storyc":[{
+                        "storyc":storyc,
+                        "usernamec":usernamec
+                    }]
+                }),200
 
 @api.route('/story/<int:storyid>/like/', methods = ['GET'])
 def like(storyid):
@@ -133,21 +132,26 @@ def rank():
 @api.route('/story/write/', methods = ['POST'])
 def write():
     if request.method == 'POST':
-        token = request.headers.get('token')
-        if User.confirmed(toekn):
-            story1 = request.get_json().get('story')
-            uid = request.get_json().get('uid')
-            keyword1 = request.get_json().get('keyword')
-            story = Story(story = story1,
-                          picture = picture)
-            keyword = Keyword(keyword1 = keyword1[0],
-                              keyword2 = keyword1[1],
-                              keyword3 = keyword1[2],
-                              keyword4 = keyword1[3],
-                              keyword5 = keyword1[4],
-                              keyword6 = keyword1[5],
-                              keyword7 = keyword1[6],
-                              keyword8 = keyword1[7])
-            return jsonify({
-                "storyid":story.id    
-            }),200
+        token = request.headers['token']
+        uid = request.get_json().get('uid')
+        user1 = User.query.filter_by(id=uid).first()
+        if user1.confirm(token):
+            story = request.get_json().get('story')
+            storys = Story.query.all()
+            for x in storys:
+                keyword1 = request.get_json().get('keyword')
+                story1 = Story(story = story,
+                               user_id = uid)
+                keyword = Keyword(keyword1 = keyword1[0],
+                      keyword2 = keyword1[1],
+                      keyword3 = keyword1[2],
+                      keyword4 = keyword1[3],
+                      keyword5 = keyword1[4],
+                      keyword6 = keyword1[5],
+                      keyword7 = keyword1[6],
+                      keyword8 = keyword1[7])
+                db.session.add(story1,keyword)
+                db.session.commit()
+                return jsonify({
+                    "storyid":story1.id    
+                }),200
