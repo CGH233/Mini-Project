@@ -2,7 +2,7 @@
 from flask import jsonify, request, Response
 from . import api
 from app import db
-from app.models import User, Story, Storyc#, Keyword
+from app.models import User, Story, Storyc
 from flask_login import login_user, logout_user, current_user, login_required
 from sqlalchemy.sql import func
 import random
@@ -14,9 +14,10 @@ def readstory(storyid):
         storys = Story.query.all()
         storycs = Storyc.query.all()
         storyc = []
-        usernamec = []
         keyword = []
+        sid = []
         for x in storys:
+            sid.append(x.id)
             if x.id == storyid:
                 uid = x.user_id
                 user = User.query.filter_by(id=uid).first()
@@ -24,31 +25,39 @@ def readstory(storyid):
                 story = x.story
                 keywords = x.keywords
                 p = []
+                scl = []
                 for a in keywords.split("&",7):
                     p.append({'keyword':a})  
                 likenum = x.likenum
                 for sc in storycs:
                     if sc.story_id == storyid:
-                        storyc.append(sc.storyc)      
-                        usernamec.append(User.query.filter_by(id=sc.user_id).first())
+                        scl.append(sc.id)
+                        scl.sort()
+                for z in scl:
+                    storyc1 = Storyc.query.filter_by(id=z).first()
+                    usernamec = User.query.filter_by(id=storyc1.user_id).first().username
+                    storyc.append({'storyc':storyc1.storyc,
+                                           'usernamec':usernamec})
+                return jsonify({"story":story,
+                                "likenum":likenum,
+                                "username":username,
+                                "keywords":p,
+                                "storyc":storyc}),200
+        if (storyid  in sid) == False:
                 return jsonify({
-                    "story":story,
-                    "likenum":likenum,
-                    "username":username,
-                    "keywords":p,
-                    "storyc":[{
-                        "storyc":storyc,
-                        "usernamec":usernamec
-                    }]
-                }),200
+                        "message":"wrong"
+                    })
 
 @api.route('/story/<int:storyid>/like/', methods = ['GET'])
 def like(storyid):
     if request.method == 'GET':        
         story = Story.query.filter_by(id=storyid).first()
+        user = User.query.filter_by(id=story.user_id).first()
         likenum = int(story.likenum) + 1
+        userlikenum = int(user.userlikenum) + 1
         story.likenum = likenum
-        db.session.add(story)
+        user.userlikenum = userlikenum
+        db.session.add(story,user)
         db.session.commit()
         return jsonify({
             "likenum":story.likenum    
@@ -57,31 +66,40 @@ def like(storyid):
 
 @api.route('/story/random/', methods = ['GET'])
 def randomstory():
-    a = 0
     story = []
-    y =[]
+    y = []
     if request.method == 'GET':
         x = db.session.query(func.max(Story.id)).scalar()
-        for a in range(5):
+        a = 0
+        while int(a) < 6:
             b = random.randint(1,x)
-            y.append(b)
-            s = Story.query.filter_by(id=b).first()
-            if len(s.story) > 30:
-                   k = s.story[0:30]
+            if b in y:
+                pass
             else:
-                   k = s.story
-            username = User.query.filter_by(id=s.user_id).first().username
-            p = []
-            for a in s.keywords.split("&",7):
-                p.append({'keyword':a})
-            story.append({'username':username,
-                          'storyid':s.id,
-                          'story':k,
-                          'likenum':s.likenum,
-                          'keyword':p})
+                a += 1
+                y.append(b)
+                st = Story.query.all()
+                sid = []
+                for z in st:
+                    sid.append(z.id)
+                if b in sid:
+                    s = Story.query.filter_by(id=b).first()
+                    if len(s.story) > 30:
+                           k = s.story[0:30]
+                    else:
+                           k = s.story
+                    username = User.query.filter_by(id=s.user_id).first().username
+                    p = []
+                    for l in s.keywords.split("&",7):
+                        p.append({'keyword':l})
+                    story.append({'username':username,
+                              'storyid':s.id,
+                              'story':k,
+                              'likenum':s.likenum,
+                              'keyword':p})
         return jsonify({
                     "story":story    
-        }),200
+                }),200
 
 @api.route('/story/rank/', methods = ['GET'])
 def rank():
@@ -140,3 +158,46 @@ def write():
             return jsonify({
                 "storyid":story1.id    
             }),200
+
+
+@api.route('/story/<int:storyid>/continue/', methods = ['POST'])
+def continue1(storyid):
+    if request.method == 'POST':
+        token = request.headers['token']
+        uid = request.get_json().get('uid')
+        user = User.query.filter_by(id=uid).first()
+        if user.confirm(token):
+            storyc = request.get_json().get('storyc')
+            story = Story.query.filter_by(id=storyid).first()
+            storyc1 = Storyc(storyc=storyc,
+                             story_id=storyid,
+                             user_id=uid)
+            user.usa += 1
+            user.userwords += len(storyc)
+            db.session.add(storyc1,user)
+            db.session.commit()
+            return jsonify({
+                    "storycid":storyc1.id
+                })
+
+@api.route('/story/<int:storyid>/delete/', methods = ['DELETE'])
+def delete1(storyid):    
+    if request.method == 'DELETE':
+        token = request.headers['token']
+        story = Story.query.filter_by(id=storyid).first()
+        user = User.query.filter_by(id=story.user_id).first()
+        if user.confirm(token):
+            try:
+                storyc = Storyc.query.filter_by(story_id=storyid).first()
+            except:
+                storyc = None
+            if storyc is not None:
+                return jsonify({
+                            "message":"wrong"
+                        }),403
+            else:
+                db.session.delete(story)
+                db.session.commit()
+                return jsonify({
+                        "message":"OK"
+                    }),200
